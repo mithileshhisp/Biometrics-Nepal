@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -79,7 +81,7 @@ public class MainFrame extends javax.swing.JFrame {
      * Creates new form NewJFrame1
      */
     public MainFrame() {
-        this.setUndecorated(true);
+        this.setUndecorated(false);
         initComponents();
     }
     
@@ -292,7 +294,12 @@ public class MainFrame extends javax.swing.JFrame {
                 );
                 
 		this.setVisible(true);
-		this.setTitle("HISP Biometric");
+                try {  
+                    this.setIconImage(ImageIO.read(new File("logo.png")));
+                }catch (IOException ex) {
+                    Logger.getLogger(LoginFrame.class.getName()).log(Level.SEVERE, null, ex);
+                }   
+		//this.setTitle("HISP Biometric");
 		this.setResizable(false);
 		
 		btnOpen.addActionListener(new ActionListener() {
@@ -785,7 +792,6 @@ public class MainFrame extends javax.swing.JFrame {
         btnClose = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("HISP Biometric");
         setResizable(false);
 
         jPanel2.setBackground(new java.awt.Color(255, 255, 255));
