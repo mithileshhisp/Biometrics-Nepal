@@ -18,15 +18,17 @@ public class ServerConfiguration {
     String sqlViewID;
     String fingerprintStringAttribute;
     String fidAttribute;
+    String program_hiv;
     
     public static ServerConfiguration getDefault(){
         ServerConfiguration sc = new ServerConfiguration();
         sc.host="localhost";
-        sc.port=8080;
-        sc.dhisUrl="http://localhost:8080/dhis";
+        sc.port=8090;
+        sc.dhisUrl="http://localhost:8090/dhis";
         sc.sqlViewID = "Ugohq30jgpi";
         sc.fingerprintStringAttribute ="ySaNYnlAMWL";
         sc.fidAttribute= "ePbX8aM22Nb";
+        sc.program_hiv = "L78QzNqadTV";
                 
         return sc;
     }
@@ -88,8 +90,16 @@ public class ServerConfiguration {
         this.dhisUrl = dhisUrl;
     }
     
+   public String getProgram_hiv() {
+        return program_hiv;
+    }
+
+    public void setProgram_hiv(String program_hiv) {
+        this.program_hiv = program_hiv;
+    }
     
     @Override
+
     public String toString(){
         return new Gson().toJson(this);
     }

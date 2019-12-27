@@ -68,24 +68,29 @@ public class FingerPrintApplicationServerInstance {
             return false;
         }else{
             int fid;
+            //fid = 4789;
+            
             try{
-                fid = NetworkCall.getLatestFid();   
+                fid = NetworkCall.getLatestFid();  
             }catch(NetworkException ex){
                 ex.printStackTrace();
                 fid = -1;
                 
             }
+            
             if(fid==-1){
                 System.out.println("Error retriving fid");
                 Logger.getLogger(FingerPrintApplicationServerInstance.class.getName()).log(Level.SEVERE,"Error Retriving FID");
                 return false;
             }else{
                 lastFID = fid;
-                System.out.println("Latest Fid :"+lastFID);
-                Logger.getLogger(FingerPrintApplicationServerInstance.class.getName()).log(Level.INFO,"Latest FID"+lastFID);
+                System.out.println("Latest Fid :"+ lastFID);
+                Logger.getLogger(FingerPrintApplicationServerInstance.class.getName()).log(Level.INFO,"Latest FID -- "+ lastFID);
                 List<FingerPrint> fingerprints;
+                
                 try {
                     fingerprints = NetworkCall.getAllFingerPrints();
+                    System.out.println("fingerprints size :"+ fingerprints.size());
                 } catch (NetworkException ex) {
                     Logger.getLogger(FingerPrintApplicationServerInstance.class.getName()).log(Level.SEVERE, null, ex);
                     ex.printStackTrace();

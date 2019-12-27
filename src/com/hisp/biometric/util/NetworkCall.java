@@ -5,6 +5,10 @@
  */
 package com.hisp.biometric.util;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.hisp.biometric.login.LoginCredentials;
 import com.hisp.biometric.main.FingerPrint;
 import com.hisp.biometric.response.QueryResponse;
@@ -73,9 +77,9 @@ public class NetworkCall {
         config = ConfigurationAccess.getServerConfiguration();
         if(config!=null){
             dhis_domain = config.getDhisUrl();
-            LATEST_FID_URL = dhis_domain+LATES_FID_SUFFIX+config.getSqlViewID()+"/data?paging=false";
+            LATEST_FID_URL = dhis_domain+LATES_FID_SUFFIX+config.getSqlViewID()+"/data.json?paging=false";
             ALL_TEI_DATA_URL = dhis_domain+ALL_TEI_DATA_SUFFIX+"&attribute="
-                    +config.getFingerprintStringAttribute()+"&attribute="+config.getFidAttribute();
+                    +config.getFingerprintStringAttribute()+"&attribute="+config.getFidAttribute()+"&program="+config.getProgram_hiv();
             String tscheme = dhis_domain.substring(0,dhis_domain.indexOf(":"));
             if(tscheme.length()==4 || tscheme.length()==5) HTTPSCHEME = tscheme;
             
@@ -87,8 +91,7 @@ public class NetworkCall {
             dhis_domain = config.getDhisUrl();
             LATEST_FID_URL = dhis_domain+LATES_FID_SUFFIX+config.getSqlViewID()+"/data?paging=false";
             ALL_TEI_DATA_URL = dhis_domain+ALL_TEI_DATA_SUFFIX+"&attribute="
-                    +config.getFingerprintStringAttribute()+"&attribute="+config.getFidAttribute();
-            
+                    +config.getFingerprintStringAttribute()+"&attribute="+config.getFidAttribute()+"&program="+config.getProgram_hiv();
         }
         System.out.println("Dhis Domain : "+dhis_domain);
         Logger.getLogger(FingerPrintApplicationServerInstance.class.getName()).log(Level.INFO,"SCHEME : "+HTTPSCHEME);
@@ -199,13 +202,22 @@ public class NetworkCall {
     
     public static int getLatestFid() throws NetworkException{
         CloseableHttpClient httpclient = HttpClientBuilder.create().build();
-
-        HttpHost targetHost = new HttpHost(config.getHost(), config.getPort(), HTTPSCHEME);
+        QueryResponse responseMapped = null;
+        Integer latestFID = null;
+        HttpHost targetHost = new HttpHost( config.getHost(), config.getPort(), HTTPSCHEME);
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                 new AuthScope(targetHost.getHostName(), targetHost.getPort()),
                 new UsernamePasswordCredentials("hispdev", "Devhisp@1"));
 
+        System.out.println("INSIDE Host  :" + config.getHost());
+        System.out.println("INSIDE Port  :" + config.getPort());
+        
+        System.out.println("INSIDE targetHost  :" + targetHost );
+        
+        System.out.println("LT FID URL :" + LATEST_FID_URL);
+        
+        System.out.println("inside Latest FID -- "   + LATEST_FID_URL );
         // Create AuthCache instance
         AuthCache authCache = new BasicAuthCache();
         // Generate BASIC scheme object and add it to the local auth cache
@@ -218,22 +230,41 @@ public class NetworkCall {
         context.setAuthCache(authCache);
 
         //System.out.println(LATEST_FID_URL);
-        HttpGet httpget = new HttpGet(LATEST_FID_URL);
-        System.out.println("LT FID URL :"+LATEST_FID_URL);
+        //HttpGet httpget = new HttpGet( LATEST_FID_URL );
+        //System.out.println("LT FID URL :" + LATEST_FID_URL);
+        
+        //String newApiResponse = sendRecordingRequest();
+        
+        //System.out.println("new API Response :" + newApiResponse);
+        
         //for (int i = 0; i < 3; i++) {
-            QueryResponse responseMapped;
+        //QueryResponse responseMapped;
         try {
-            CloseableHttpResponse response = httpclient.execute(
-                targetHost, httpget, context);
+            HttpGet httpget = new HttpGet( LATEST_FID_URL );
+            httpget.setHeader("Content-type","application/json");
+            System.out.println("LT FID URL :" + LATEST_FID_URL);
+            System.out.println(LATEST_FID_URL + " host : " + config.getHost() + " post : "+ config.getPort() );
+            CloseableHttpResponse response = httpclient.execute(targetHost, httpget, context);
+            
+            //System.out.println("------------------------------- API Resopnse " + response );
+            
             if(response.getStatusLine().getStatusCode()==200){
+                
                 HttpEntity entity = response.getEntity();
+                
+                //System.out.println("------------------------------- Latest entity " + entity );
+                
                 String st = EntityUtils.toString(entity);
-                responseMapped = QueryResponse.fromJson(st);
+                
+                //System.out.println("------------------------------- Latest ST " + st );
+                
+                latestFID = jsonParse( st );
+                //responseMapped = QueryResponse.fromJson(st);
 
-                System.out.println("-------------------------------");
+                System.out.println("------------------------------- Latest responseMapped " + latestFID );
                 //System.out.println(st);
-                System.out.println("Latest FID "+responseMapped.getFID());
-                Logger.getLogger(FingerPrintApplicationServerInstance.class.getName()).log(Level.INFO,"Latest FID "+responseMapped.getFID());
+                //System.out.println("Latest FID "+responseMapped.getFID());
+                //Logger.getLogger(FingerPrintApplicationServerInstance.class.getName()).log(Level.INFO,"Latest FID "+responseMapped.getFID());
                 response.close();
                 httpclient.close();
             }else{
@@ -251,8 +282,8 @@ public class NetworkCall {
             System.out.println(ex.getMessage());
             return -1;
         }
-        return responseMapped.getFID();
-        
+        //return responrseMapped.getFID();
+        return latestFID;
     }
     
     
@@ -276,11 +307,14 @@ public class NetworkCall {
         HttpClientContext context = HttpClientContext.create();
         context.setCredentialsProvider(credsProvider);
         context.setAuthCache(authCache);
-        QueryResponse responseMapped;
-        HttpGet httpget = new HttpGet(ALL_TEI_DATA_URL);
+        
+        
+        QueryResponse responseMapped = null;
+        //HttpGet httpget = new HttpGet(ALL_TEI_DATA_URL);
         //for (int i = 0; i < 3; i++) {
             
         try {
+            HttpGet httpget = new HttpGet(ALL_TEI_DATA_URL);
             CloseableHttpResponse response = httpclient.execute(
                 targetHost, httpget, context);
             if(response.getStatusLine().getStatusCode()==200){
@@ -311,4 +345,102 @@ public class NetworkCall {
     }
     
     
+    public static String sendRecordingRequest() {
+        System.out.println("inside new API Response :" );
+        CloseableHttpResponse response = null;
+        try{
+            final CloseableHttpClient client = HttpClientBuilder.create().build();
+            final HttpGet get = new HttpGet(ALL_TEI_DATA_URL);
+            response = client.execute(get);
+            HttpEntity content = response.getEntity();
+            String message = EntityUtils.toString(content);
+            System.out.println("inside new API Response :" + message);
+            return message;
+        } catch (Exception ex) {
+            //LOGGER.severe("Request: " + ex);
+            System.out.println("inside new API Exception :" + ex.getMessage());
+        } finally {
+            //HttpClientUtils.closeQuietly(response);
+        }
+        return "";
 }
+    
+    
+    public static Integer jsonParse(String jsonLine) {
+     
+    Integer latestCount = null;
+    System.out.println("inside json parse" );    
+    JsonElement jelement = new JsonParser().parse(jsonLine);
+    
+    //System.out.println("jelement  " + jelement ); 
+    
+    JsonObject  jobject = jelement.getAsJsonObject();
+    
+    //System.out.println("jobject  " + jobject );  
+    
+    jobject = jobject.getAsJsonObject("listGrid");
+    
+    //System.out.println("json jobject  listGrid :" + jobject );
+    
+    JsonArray jarray = jobject.getAsJsonArray("rows");
+    
+    System.out.println("json jarray  rows :" + jarray );
+    System.out.println("json jarray  rows size :" + jarray.size() );
+    
+    //List<List<String>> rows = jarray;
+    
+    System.out.println(  "ababa " + jarray.get(0) );
+    
+    JsonArray innerJarray = jarray.get(0).getAsJsonArray();
+    
+    System.out.println(  "innerJarray 1 " + innerJarray.get(1) );
+    
+    System.out.println(  "innerJarray 2 " + innerJarray.get(1).getAsInt() );
+    
+    //latestCount = Integer.parseInt(innerJarray.get(1).toString());
+    
+    latestCount = innerJarray.get(1).getAsInt();
+    
+  /*  
+   for(int i=0; i<jarray.size(); i++) {
+       
+         
+         
+         JsonArray josonInnerArray = jsonObject.getAsJsonArray();
+         
+        System.out.println("json josonInnerArray  rows :" + josonInnerArray );
+        System.out.println("json josonInnerArray  rows size :" + josonInnerArray.size() );
+    
+        System.out.println( " bsbsbsb " + josonInnerArray.get(1).getAsInt() );
+        
+        
+      }
+  
+    */
+    
+    
+    
+    /*
+    jobject = jarray.get(0).getAsJsonObject();
+    
+    System.out.println("json object :" + jobject );
+    
+    JsonArray outerArray;
+    
+    outerArray = jarray;
+    
+    JsonObject jsonOject = (JsonObject) outerArray.get(1);
+    
+    System.out.println("outerArray :" + jsonOject );
+    
+    Integer latestId = jsonOject.getAsInt();
+    
+    System.out.println("lastId :" + latestId );
+    */
+    
+    return latestCount;
+    }
+
+
+}
+

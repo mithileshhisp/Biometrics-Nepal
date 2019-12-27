@@ -16,6 +16,7 @@ import java.util.List;
  */
 public class QueryResponse {
     String title;
+    String listGrid;
     List<List<String>> rows;
     
     public int getFID(){
