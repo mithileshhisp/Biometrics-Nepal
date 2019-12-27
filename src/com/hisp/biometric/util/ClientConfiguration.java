@@ -33,8 +33,8 @@ public class ClientConfiguration {
     public static ClientConfiguration getDefault(){
         ClientConfiguration cc = new ClientConfiguration();
         
-        cc.dhisUrl = "http://localhost:8080/dhis";
-        cc.fingerprintUrl = "http://localhost:8080/NepalFingerprintServer";
+        cc.dhisUrl = "http://localhost:8090/dhis";
+        cc.fingerprintUrl = "http://localhost:8090/NepalFingerprintServer";
         
         cc.attribute_fid = "ePbX8aM22Nb";
         cc.attribute_fid_code = "fingerprint_id";
@@ -46,7 +46,7 @@ public class ClientConfiguration {
         cc.program_hiv = "L78QzNqadTV";
         
         cc.host = "localhost";
-        cc.port = 8080;
+        cc.port = 80900;
         return cc;
     }
     
