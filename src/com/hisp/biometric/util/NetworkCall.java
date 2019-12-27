@@ -255,6 +255,10 @@ public class NetworkCall {
             
             CloseableHttpResponse response = httpclient.execute(request);
             
+            System.out.println("post json -- " +json);
+            
+            System.out.println("response string -- " +response);
+            
             if(response.getStatusLine().getStatusCode()==200){
                 System.out.println(response.getStatusLine());
                 //InputStream is = response.getEntity().getContent();

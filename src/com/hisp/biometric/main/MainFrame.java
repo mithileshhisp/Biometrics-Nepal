@@ -15,6 +15,8 @@ import com.hisp.biometric.util.BrowserConnection;
 import com.hisp.biometric.util.NetworkCall;
 import com.zkteco.biometric.FingerprintSensorErrorCode;
 import com.zkteco.biometric.FingerprintSensorEx;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -736,12 +738,16 @@ public class MainFrame extends javax.swing.JFrame {
                 }else if(fp.getFid()!=-1){
                     //textArea.setText("Recognised : ID "+fp.getFid());
                     textArea.setText("Fingerprints recognised.");
+                    textArea.setFont(new Font("Arial", Font.PLAIN, 18));
+                    textArea.setSelectedTextColor(Color.RED);
                     lastFp = fp;
                     btnRegister.setText("Go to Dashboard");
                     btnRegister.setEnabled(true);
                 }else{
                     //textArea.setText("Not Recognized Enrollment possible");
                     textArea.setText("Fingerprints not recognised. Please add/upate patient");
+                    textArea.setFont(new Font("Arial", Font.PLAIN, 18));
+                    textArea.setSelectedTextColor(Color.RED);
                     btnRegister.setEnabled(false);
                 }
 
