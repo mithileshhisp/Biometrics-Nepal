@@ -736,13 +736,50 @@ public class MainFrame extends javax.swing.JFrame {
                 if(fp==null){
                     textArea.setText("Error connecting to Server...");
                 }else if(fp.getFid()!=-1){
+                    
+                    TrackedEntityInstance responseTEI;
+                    try{
+                        //tei = NetworkCall.getTrackedEntityInstanceWithfid(lastFp.getFid()+"");
+                        responseTEI = NetworkCall.getTrackedEntityInstanceWithfid(fp.getFid()+"");
+                    }catch(NetworkException ex){
+                        JOptionPane.showMessageDialog(MainFrame.this, ex.getMessage(),"Error",JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    
+                    if(responseTEI!=null){   
+                        try{
+                            OrgunitResponse orgResp = NetworkCall.getOrgunitDetails(responseTEI.getOrgUnit());
+                            //textArea.setText("Patient found \n Patient \t:"+tei.getLastName() +"\n ,Client Code \t:"+tei.getCode()+", was registered at "+tei.getOrgUnit());
+                            //textArea.setText("Patient found with "+responseTEI.getCode() +" and was registered at "+orgResp.getDisplayName());
+                            // teiValidated = tei;
+                            //btnRegister.setEnabled(true);
+                             textArea.setText("Patients recognised and was registered at [ " + orgResp.getDisplayName() +" ]");
+                             textArea.setFont(new Font("Arial", Font.PLAIN, 18));
+                             textArea.setSelectedTextColor(Color.RED);
+                             lastFp = fp;
+                             btnRegister.setText("Go to Dashboard");
+                             btnRegister.setEnabled(true);
+                        }catch(NetworkException ex){
+                            //textArea.setText("Network error please retry");
+                        }
+
+                    }
+                    else{
+                        //textArea.setText("Not Recognized Enrollment possible");
+                        textArea.setText("Fingerprints not recognised. Please add/upate patient");
+                        textArea.setFont(new Font("Arial", Font.PLAIN, 18));
+                        textArea.setSelectedTextColor(Color.RED);
+                        btnRegister.setEnabled(false);
+                    }    
                     //textArea.setText("Recognised : ID "+fp.getFid());
+                    /*
                     textArea.setText("Fingerprints recognised.");
                     textArea.setFont(new Font("Arial", Font.PLAIN, 18));
                     textArea.setSelectedTextColor(Color.RED);
                     lastFp = fp;
                     btnRegister.setText("Go to Dashboard");
                     btnRegister.setEnabled(true);
+                    */
                 }else{
                     //textArea.setText("Not Recognized Enrollment possible");
                     textArea.setText("Fingerprints not recognised. Please add/upate patient");
